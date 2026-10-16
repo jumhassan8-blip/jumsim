@@ -1,5 +1,0 @@
-{
-  "applePay": { "enabled": true, "merchantId": "merchant.com.jumesim" },
-  "googlePay": { "enabled": true, "merchantName": "Jum e-SIM" },
-  "card": { "enabled": true }
-}

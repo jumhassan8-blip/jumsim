@@ -14,7 +14,6 @@ import { adminDb } from '../lib/firebase-admin'
  * No service account configured → 501; the client treats that as
  * "nothing restored", never a crash.
  */
-export default withApi(async (body, _req, res) => {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
   const uid = typeof body.uid === 'string' ? body.uid.trim() : ''
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
