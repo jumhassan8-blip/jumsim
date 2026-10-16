@@ -1,0 +1,19 @@
+{
+  "name": "jum-esim-functions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Jum e-SIM Cloud Functions — welcome email trigger (Module 17)",
+  "main": "lib/index.js",
+  "engines": { "node": "20" },
+  "scripts": {
+    "build": "tsc",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

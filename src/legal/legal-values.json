@@ -1,0 +1,11 @@
+{
+  "$comment": "Single source of truth for legal-page [BRACKET] values. Imported by the in-app renderer (src/legal/policies.ts) and the static-site generator (scripts/build-legal.mjs). Review with a lawyer before launch: operator + governing law are placeholder defaults.",
+  "operator": "the Jum e-SIM team",
+  "updated": "2026-10-07",
+  "supportEmail": "support@jumesim.com",
+  "retentionYears": 7,
+  "chatRetentionMonths": 12,
+  "refundWindowDays": 14,
+  "governingCountry": "Estonia",
+  "governingLocation": "Tallinn"
+}

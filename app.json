@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Jum e-SIM",
+    "slug": "jum-esim",
+    "scheme": "jumesim",
+    "ios": {
+      "bundleIdentifier": "com.jumesim.app",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["whatsapp"]
+      }
+    },
+    "android": {
+      "package": "com.jumesim.app"
+    },
+    "plugins": ["./plugins/with-whatsapp-queries.cjs"]
+  }
+}
