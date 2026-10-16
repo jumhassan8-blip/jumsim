@@ -1,13 +1,161 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jum e-SIM — Global eSIM Store</title>
-    <script type="module" crossorigin src="/assets/index-C37Ymngr.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-B32Icpa5.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Checkout — Jum e-SIM</title>
+  <meta name="description" content="Guest checkout for Jum e-SIM global data plans. Apple Pay, Google Pay, Link and cards. Instant eSIM delivery." />
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+  <script src="https://js.stripe.com/v3/" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <a class="brand" href="https://jumesim.com">Jum <span>e-SIM</span></a>
+      <span class="secure">🔒 Secured by Stripe</span>
+    </header>
+
+    <!-- ── CHECKOUT (single page, guest first) ──────────────── -->
+    <section id="step-form" hidden>
+
+      <!-- 1 · order summary -->
+      <div class="card summary" aria-live="polite">
+        <div id="plan-box" class="plan-row">
+          <span id="plan-flag" class="flag"></span>
+          <div class="min-w-0 flex-1">
+            <div id="plan-name" class="plan-name">&nbsp;</div>
+            <div id="plan-sub" class="plan-sub">&nbsp;</div>
+          </div>
+          <div class="text-right">
+            <div id="plan-price" class="plan-price"></div>
+            <div id="plan-fx" class="plan-fx"></div>
+          </div>
+        </div>
+        <div class="guarantee-banner">
+          ⚡ 10-min auto-refund guarantee — full refund if your eSIM never connects.
+        </div>
+      </div>
+
+      <!-- 2 · email (guest-first) -->
+      <div class="card">
+        <label class="field">
+          <span class="field-label">Where should we send your eSIM?</span>
+          <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" />
+        </label>
+        <label class="check-row">
+          <input id="make-account" type="checkbox" />
+          <span>Create a Jum e-SIM account <small>(sync this eSIM across devices)</small></span>
+        </label>
+        <p id="guest-note" class="guest-note">Checkout as guest — your eSIM appears on this page and in your email. No account needed.</p>
+        <p id="auth-hint" class="guest-note" hidden></p>
+      </div>
+
+      <!-- 3 · payment methods (Stripe Payment Element: Apple Pay / Google Pay / Link / Card) -->
+      <div class="card">
+        <span class="field-label">Payment method</span>
+        <div id="payment-element"></div>
+      </div>
+
+      <!-- 4 · terms + CTA -->
+      <div class="card">
+        <label class="check-row">
+          <input id="terms" type="checkbox" />
+          <span>I agree to the <a href="https://jumesim.com/terms" target="_blank" rel="noopener">Terms</a> and <a href="https://jumesim.com/refund" target="_blank" rel="noopener">Refund policy</a></span>
+        </label>
+        <p id="form-error" class="error" role="alert" hidden></p>
+        <button id="pay-btn" class="cta" disabled><span id="pay-label">Pay</span></button>
+      </div>
+
+      <!-- 5 · trust row -->
+      <p class="trust">Secured by Stripe &nbsp;·&nbsp; Instant delivery &nbsp;·&nbsp; 10-min guarantee</p>
+
+      <!-- coverage gate: the active provider can't fulfil this plan yet -->
+      <div id="coming-soon" class="card center" hidden>
+        <div class="check" style="background:#2A2A2C;color:#D7FF3F">🌍</div>
+        <h2>Coming soon</h2>
+        <p id="coming-soon-sub" class="muted">This destination is on the way — pick another plan below.</p>
+        <div id="coming-soon-picker" class="picker"></div>
+      </div>
+
+      <div id="plan-picker" class="card picker" hidden></div>
+    </section>
+
+    <!-- ── PROCESSING ───────────────────────────────────────── -->
+    <section id="step-processing" class="card center" hidden>
+      <div class="spinner" aria-label="Processing"></div>
+      <h2>Creating your eSIM…</h2>
+      <p class="muted">Payment confirmed. Generating your install profile — this takes a few seconds. Keep this page open.</p>
+    </section>
+
+    <!-- ── SUCCESS (instant delivery — no account required) ─── -->
+    <section id="step-success" class="card center" hidden>
+      <div class="check">✓</div>
+      <h2>Your eSIM is ready</h2>
+      <p class="muted small">It is also on its way to <b id="success-email"></b> — keep this page until installed.</p>
+
+      <div id="qr" class="qr" aria-label="eSIM install QR code"></div>
+      <div class="lpa-row">
+        <code id="lpa" class="lpa mono"></code>
+        <button id="copy-lpa" class="mini-btn">Copy code</button>
+      </div>
+
+      <details class="install-steps">
+        <summary>Install instructions</summary>
+        <ol>
+          <li><b>iPhone:</b> Settings → Cellular → Add eSIM → scan the QR code (or enter the code manually).</li>
+          <li><b>Android:</b> Settings → Network &amp; internet → SIMs → Add eSIM → scan the QR code.</li>
+          <li>Turn the Jum line on for data + data roaming when you land.</li>
+        </ol>
+      </details>
+
+      <div class="success-actions">
+        <button id="email-instructions" class="btn-ghost">📧 Install instructions to my email</button>
+        <a id="open-app" class="cta link" href="#" hidden>Open in Jum e-SIM app</a>
+      </div>
+
+      <!-- post-purchase account nudge (guest → account AFTER the money) -->
+      <div id="account-nudge" class="nudge" hidden>
+        <p class="nudge-title">Keep this eSIM forever</p>
+        <p class="muted small">Create a password — your eSIM syncs to the app and any device.</p>
+        <div class="nudge-row">
+          <div class="pw-field">
+            <input id="nudge-password" type="password" placeholder="Choose a password (8+ characters)" autocomplete="new-password" />
+            <button id="nudge-toggle" type="button" class="pw-toggle" aria-label="Show password" aria-controls="nudge-password" aria-pressed="false" title="Show password">&#128065;&#65039;</button>
+          </div>
+          <button id="nudge-create" class="mini-btn primary">Create account</button>
+        </div>
+        <p id="nudge-msg" class="muted small" hidden></p>
+      </div>
+
+      <p id="order-ref" class="muted small mono"></p>
+    </section>
+
+    <!-- ── REFUND / ERROR STATES ────────────────────────────── -->
+    <section id="step-refunded" class="card center" hidden>
+      <div class="cross">↩</div>
+      <h2>Payment refunded automatically</h2>
+      <p class="muted">Your payment succeeded, but our eSIM provider could not fulfil the order. You have <b>not</b> been charged — the refund is already returning to your card (usually 5–10 business days).</p>
+      <a class="cta link ghost" href="https://wa.me/23233129788">Contact support on WhatsApp</a>
+    </section>
+
+    <section id="step-error" class="card center" hidden>
+      <div class="cross">!</div>
+      <h2 id="error-title">Something went wrong</h2>
+      <p id="error-body" class="muted"></p>
+      <a class="cta link ghost" href="https://wa.me/23233129788">Contact support on WhatsApp</a>
+    </section>
+
+    <footer class="foot">
+      <a href="https://jumesim.com/terms">Terms</a> ·
+      <a href="https://jumesim.com/privacy">Privacy</a> ·
+      <a href="https://jumesim.com/refund">Refund policy</a> ·
+      <a href="mailto:support@jumesim.com">support@jumesim.com</a>
+    </footer>
+  </div>
+</body>
 </html>
