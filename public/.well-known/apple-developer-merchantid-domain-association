@@ -1,0 +1,14 @@
+PLACEHOLDER — replace with the real file from Stripe before enabling Apple Pay.
+
+Steps:
+1. Stripe Dashboard → Settings → Payments → Apple Pay → "Add new domain"
+   for jumesim.com AND www.jumesim.com.
+2. Download the apple-developer-merchantid-domain-association file Stripe
+   generates (a hex-encoded PKCS#7 blob, no file extension).
+3. Replace THIS file's contents with that exact blob (keep the filename and
+   path), commit, deploy. Verify:
+     curl https://jumesim.com/.well-known/apple-developer-merchantid-domain-association
+4. Click "Verify" in the Stripe dashboard for both domains.
+   HTTPS is already satisfied; the file above is the only requirement.
+   (Google Pay needs no verification — it appears in Chrome automatically
+   once live keys + HTTPS are active.)

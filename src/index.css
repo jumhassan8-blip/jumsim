@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 4%; /* #0A0A0A */
+    --foreground: 0 0% 100%;
+    --card: 240 3% 11%; /* #1C1C1E */
+    --card-foreground: 0 0% 100%;
+    --popover: 240 3% 11%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 74 100% 62%; /* #D7FF3F */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 240 3% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3% 15%;
+    --muted-foreground: 240 2% 61%; /* #9A9A9E */
+    --accent: 74 100% 62%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 3% 16%;
+    --input: 240 3% 20%;
+    --ring: 74 100% 62%;
+    --radius: 14px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    background-color: #0a0a0a;
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
+    font-weight: 400;
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: #d7ff3f;
+    color: #000;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ── RTL (Arabic): directional icons mirror, layout follows dir="rtl" ── */
+html[dir='rtl'] .flip-rtl {
+  transform: scaleX(-1);
+}
